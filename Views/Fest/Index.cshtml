@@ -1,0 +1,81 @@
+@model IEnumerable<Participant>
+@{
+    ViewData["Title"] = "Participants";
+    var total = Model.Count();
+    var teamCount = Model.Count(p => p.IsTeamEvent);
+}
+
+<section class="page-head d-flex flex-wrap justify-content-between align-items-end gap-3 mb-4">
+    <div>
+        <h1 class="h2 mb-1">Participant dashboard</h1>
+        <p class="text-secondary mb-0">Everyone registered for AMTICS Technical Fest, in one place.</p>
+    </div>
+    <a class="btn btn-grad" asp-controller="Fest" asp-action="Register"><i class="bi bi-person-plus"></i> Register New Participant</a>
+</section>
+
+<section class="row g-3 mb-4">
+    <div class="col-md-4">
+        <div class="glass-card stat-card p-4">
+            <div class="stat-icon"><i class="bi bi-people-fill"></i></div>
+            <div><div class="stat-number">@total</div><div class="text-secondary small">Total registered participants</div></div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="glass-card stat-card p-4">
+            <div class="stat-icon"><i class="bi bi-calendar-event-fill"></i></div>
+            <div><div class="stat-number">@EventCatalog.All.Count</div><div class="text-secondary small">Available technical events</div></div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="glass-card stat-card p-4">
+            <div class="stat-icon"><i class="bi bi-diagram-3-fill"></i></div>
+            <div><div class="stat-number">@teamCount</div><div class="text-secondary small">Team event registrations</div></div>
+        </div>
+    </div>
+</section>
+
+<section id="participants" class="glass-card p-3 p-md-4">
+    @if (total == 0)
+    {
+        <div class="empty-state text-center py-5">
+            <div class="empty-icon"><i class="bi bi-inbox"></i></div>
+            <h2 class="h4 mt-3">No one has registered yet</h2>
+            <p class="text-secondary mx-auto" style="max-width: 420px">Be the first to join. Registered participants will appear here with their event, status and fee.</p>
+            <a class="btn btn-grad" asp-controller="Fest" asp-action="Register">Register the first participant</a>
+        </div>
+    }
+    else
+    {
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+            <h2 class="h5 mb-0">Registered participants</h2>
+            <input id="tableSearch" type="search" class="form-control form-control-sm search-box" placeholder="Search by name, event or department" aria-label="Search participants" />
+        </div>
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0" id="participantTable">
+                <thead>
+                    <tr>
+                        <th>ID</th><th>Name</th><th>Email</th><th>Department</th><th>Year</th>
+                        <th>Event</th><th>Status</th><th>Fee</th><th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                @foreach (var p in Model)
+                {
+                    var status = p.GetRegistrationStatus();
+                    <tr>
+                        <td class="text-secondary">#@p.ParticipantId</td>
+                        <td class="fw-semibold">@p.ParticipantName @if (p.IsTeamEvent) { <span class="badge badge-soft ms-1">Team</span> }</td>
+                        <td>@p.Email</td>
+                        <td>@p.Department</td>
+                        <td>@p.GetYearLabel()</td>
+                        <td>@p.EventName</td>
+                        <td><span class="badge @(status == "Confirmed" ? "bg-success" : "bg-warning text-dark")">@status</span></td>
+                        <td>@p.RegistrationFee.ToRupees()<div class="small text-secondary">@p.GetFeeCategory()</div></td>
+                        <td class="text-end"><a class="btn btn-sm btn-outline-glow" asp-controller="Fest" asp-action="Details" asp-route-id="@p.ParticipantId"><i class="bi bi-eye"></i> Details</a></td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+    }
+</section>

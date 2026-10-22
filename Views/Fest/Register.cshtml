@@ -1,0 +1,84 @@
+@model Participant
+@{
+    ViewData["Title"] = "Register";
+    var events = (IEnumerable<Event>)ViewBag.Events;
+    var departments = (IEnumerable<string>)ViewBag.Departments;
+    var years = new[] { (1, "1st Year"), (2, "2nd Year"), (3, "3rd Year"), (4, "4th Year") };
+    Func<string, string> inv = key => ViewData.ModelState[key]?.Errors.Count > 0 ? " is-invalid" : "";
+}
+
+<div class="row justify-content-center">
+    <div class="col-lg-8 col-xl-7">
+        <div class="glass-card p-4 p-md-5">
+            <h1 class="h2 mb-1">Register a participant</h1>
+            <p class="text-secondary mb-4">Fill in the details below. Fields are checked on the server before saving.</p>
+
+            <form asp-controller="Fest" asp-action="Register" method="post" novalidate>
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+                <div class="mb-3">
+                    <label asp-for="ParticipantName" class="form-label"></label>
+                    <input asp-for="ParticipantName" class="form-control@(inv("ParticipantName"))" placeholder="e.g. Riya Patel" autocomplete="name" />
+                    <span asp-validation-for="ParticipantName" class="invalid-feedback d-block"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Email" class="form-label"></label>
+                    <input asp-for="Email" type="email" class="form-control@(inv("Email"))" placeholder="you@college.edu" autocomplete="email" />
+                    <span asp-validation-for="Email" class="invalid-feedback d-block"></span>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-8 mb-3">
+                        <label asp-for="Department" class="form-label"></label>
+                        <select asp-for="Department" class="form-select@(inv("Department"))">
+                            <option value="">Select department</option>
+                            @foreach (var d in departments)
+                            {
+                                <option value="@d">@d</option>
+                            }
+                        </select>
+                        <span asp-validation-for="Department" class="invalid-feedback d-block"></span>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label asp-for="Year" class="form-label"></label>
+                        <select asp-for="Year" class="form-select@(inv("Year"))">
+                            <option value="0">Select year</option>
+                            @foreach (var y in years)
+                            {
+                                <option value="@y.Item1">@y.Item2</option>
+                            }
+                        </select>
+                        <span asp-validation-for="Year" class="invalid-feedback d-block"></span>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="EventName" class="form-label"></label>
+                    <select asp-for="EventName" class="form-select@(inv("EventName"))" id="eventSelect">
+                        <option value="">Select event</option>
+                        @foreach (var ev in events)
+                        {
+                            var rupees = ev.RegistrationFee.ToRupees();
+                            var category = ev.GetFeeCategory();
+                            <option value="@ev.EventName" data-label="@rupees" data-category="@category">@ev.EventName (@rupees)</option>
+                        }
+                    </select>
+                    <span asp-validation-for="EventName" class="invalid-feedback d-block"></span>
+                    <div id="feePreview" class="fee-preview mt-2 d-none"></div>
+                </div>
+
+                <div class="form-check form-switch mb-4">
+                    <input asp-for="IsTeamEvent" class="form-check-input" role="switch" />
+                    <label asp-for="IsTeamEvent" class="form-check-label"></label>
+                    <div class="form-text">Tick this if you are registering as part of a team.</div>
+                </div>
+
+                <div class="d-flex flex-wrap gap-2">
+                    <button type="submit" class="btn btn-grad"><i class="bi bi-check2-circle"></i> Submit registration</button>
+                    <a class="btn btn-outline-glow" asp-controller="Fest" asp-action="Index"><i class="bi bi-x-circle"></i> Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

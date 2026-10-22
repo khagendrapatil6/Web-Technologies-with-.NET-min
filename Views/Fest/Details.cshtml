@@ -1,0 +1,60 @@
+@model Participant
+@{
+    ViewData["Title"] = Model.ParticipantName;
+    var status = Model.GetRegistrationStatus();
+}
+
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <a class="btn btn-outline-glow btn-sm mb-3" asp-controller="Fest" asp-action="Index"><i class="bi bi-arrow-left"></i> Back to Participants</a>
+
+        @if (status == "Confirmed")
+        {
+            <div class="alert alert-success" role="alert">
+                <i class="bi bi-patch-check-fill me-2"></i><strong>Registration confirmed.</strong> Your seat is reserved.
+            </div>
+        }
+        else
+        {
+            <div class="alert alert-warning" role="alert">
+                <i class="bi bi-hourglass-split me-2"></i><strong>Registration pending.</strong>
+                Pay the @Model.RegistrationFee.ToRupees() fee at the registration desk to confirm your seat.
+            </div>
+        }
+
+        <div class="glass-card p-4 p-md-5">
+            <div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-3">
+                <div>
+                    <div class="text-secondary small">Participant #@Model.ParticipantId</div>
+                    <h1 class="h2 mb-0">@Model.ParticipantName</h1>
+                </div>
+                <span class="badge fs-6 @(status == "Confirmed" ? "bg-success" : "bg-warning text-dark")">@status</span>
+            </div>
+
+            <p class="welcome-msg">Welcome, @Model.ParticipantName! You are registered for @Model.EventName.</p>
+
+            <dl class="row detail-list mb-0">
+                <dt class="col-sm-4">Event</dt><dd class="col-sm-8">@Model.EventName</dd>
+                <dt class="col-sm-4">Department</dt><dd class="col-sm-8">@Model.Department</dd>
+                <dt class="col-sm-4">Academic year</dt><dd class="col-sm-8">@Model.GetYearLabel()</dd>
+                <dt class="col-sm-4">Email</dt><dd class="col-sm-8">@Model.Email</dd>
+                <dt class="col-sm-4">Team event</dt>
+                <dd class="col-sm-8">@if (Model.IsTeamEvent) { <span class="badge badge-soft">Yes, team entry</span> } else { <span class="badge bg-secondary">No, individual</span> }</dd>
+                <dt class="col-sm-4">Registration fee</dt>
+                <dd class="col-sm-8"><strong>@Model.RegistrationFee.ToRupees()</strong> <span class="badge bg-purple ms-1">@Model.GetFeeCategory()</span></dd>
+                <dt class="col-sm-4">Registered on</dt>
+                <dd class="col-sm-8">@(Model.RegisteredOn?.ToString("dd MMM yyyy, hh:mm tt") ?? "-")</dd>
+            </dl>
+
+            <div class="d-flex flex-wrap gap-2 mt-4">
+                <a class="btn btn-grad" asp-controller="Fest" asp-action="Index"><i class="bi bi-arrow-left"></i> Back to Participants</a>
+                @if (status == "Pending")
+                {
+                    <form asp-controller="Fest" asp-action="Confirm" asp-route-id="@Model.ParticipantId" method="post">
+                        <button type="submit" class="btn btn-success"><i class="bi bi-cash-coin"></i> Confirm payment</button>
+                    </form>
+                }
+            </div>
+        </div>
+    </div>
+</div>

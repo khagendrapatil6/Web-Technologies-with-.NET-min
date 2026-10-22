@@ -1,0 +1,71 @@
+@model IEnumerable<Event>
+@{
+    ViewData["Title"] = "Welcome";
+}
+
+<section class="hero mb-5">
+    <div class="row align-items-center g-4">
+        <div class="col-lg-7">
+            <span class="badge badge-soft mb-3"><i class="bi bi-calendar-event"></i> Annual technical festival</span>
+            <h1 class="hero-title">AMTICS TECHNICAL FEST</h1>
+            <p class="lead text-secondary mt-3 mb-4">
+                Two days of coding battles, robots, AI builds and design sprints. Pick your events, register in a minute,
+                and show the campus what you can build.
+            </p>
+            <div class="d-flex flex-wrap gap-2">
+                <a class="btn btn-grad btn-lg" asp-controller="Fest" asp-action="Register"><i class="bi bi-rocket-takeoff"></i> Register Now</a>
+                <a class="btn btn-outline-glow btn-lg" asp-controller="Fest" asp-action="Index"><i class="bi bi-people"></i> View Participants</a>
+            </div>
+        </div>
+        <div class="col-lg-5">
+            <div class="terminal">
+                <div class="terminal-bar"><span></span><span></span><span></span></div>
+<pre><code>fest.Open("AMTICS");
+foreach (var e in fest.Events)
+    Console.WriteLine(e);
+
+// @Model.Count() events, seats are limited
+fest.Register(you);   // done</code></pre>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="mb-5">
+    <div class="row g-3 text-center">
+        <div class="col-6 col-md-3"><div class="glass-card p-3"><div class="fw-bold fs-4 display-font">@Model.Count()</div><div class="small text-secondary">Technical events</div></div></div>
+        <div class="col-6 col-md-3"><div class="glass-card p-3"><div class="fw-bold fs-4 display-font">@Model.Sum(e => e.MaximumParticipants)</div><div class="small text-secondary">Total seats</div></div></div>
+        <div class="col-6 col-md-3"><div class="glass-card p-3"><div class="fw-bold fs-4 display-font">@Model.Min(e => e.RegistrationFee).ToRupees()</div><div class="small text-secondary">Lowest entry fee</div></div></div>
+        <div class="col-6 col-md-3"><div class="glass-card p-3"><div class="fw-bold fs-4 display-font">2 days</div><div class="small text-secondary">Of competitions</div></div></div>
+    </div>
+</section>
+
+<section class="mb-5">
+    <h2 class="h3 mb-1">Featured events</h2>
+    <p class="text-secondary mb-4">Every event has limited seats, so register early.</p>
+    <div class="row g-4">
+        @foreach (var ev in Model)
+        {
+            var category = ev.GetFeeCategory();
+            var badgeClass = category == "Free Event" ? "bg-success" : category == "Standard Event" ? "bg-info text-dark" : "bg-purple";
+            <div class="col-md-6 col-lg-4">
+                <div class="glass-card event-card h-100 p-4">
+                    <div class="event-icon"><i class="bi @ev.Icon"></i></div>
+                    <h3 class="h5 mt-3">@ev.EventName</h3>
+                    <p class="text-secondary small">@ev.Description</p>
+                    <div class="d-flex justify-content-between align-items-center mt-auto">
+                        <span class="fw-bold fs-5 display-font">@ev.RegistrationFee.ToRupees()</span>
+                        <span class="badge @badgeClass">@category</span>
+                    </div>
+                    <div class="small text-secondary mt-2"><i class="bi bi-person-check"></i> @ev.MaximumParticipants seats</div>
+                </div>
+            </div>
+        }
+    </div>
+</section>
+
+<section class="cta-band text-center">
+    <h2 class="h3">Ready to compete?</h2>
+    <p class="text-secondary">Register in under a minute. No payment needed for free events.</p>
+    <a class="btn btn-grad btn-lg" asp-controller="Fest" asp-action="Register">Register Now</a>
+</section>
